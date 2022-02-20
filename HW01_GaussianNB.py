@@ -98,6 +98,34 @@ class Gaussian_NaiveBayes(object):
 
         return np.array(mean_gamma), np.array(var_gamma), np.array(prior_gamma)
 
+    def fit_with_gamma_new(self, X_train, y_train, n_class):
+        """
+        This function is to calculate the mean, variance, prior on the training data
+        Input:
+        -- X_train:
+        -- y_train:
+        Output:
+        -- mean
+        -- variance
+        -- prior
+        """
+        labels = np.arange(n_class)
+        data_with_labels = np.c_[X_train, y_train]
+        total_counts = X_train.shape[0]
+        mean_gamma = []
+        var_gamma = []
+        prior_gamma = []
+
+        for label in labels:
+            data_g = data_with_labels[data_with_labels[:,-1]==label]
+            Cg, Rg, Wg = self.__calculate_parameter_with_k_gamma(data_g[:, :-1],
+                                                                 total_counts)
+            mean_gamma.append(Cg)
+            var_gamma.append(Rg)
+            prior_gamma.append(Wg)
+
+        return np.array(mean_gamma), np.array(var_gamma), np.array(prior_gamma)
+
     def __calculate_parameter_with_k_gamma(self, grouped_data, total_n):
         """
         This function is to calculate the mean, variance, prior from gamma of class k
@@ -109,7 +137,7 @@ class Gaussian_NaiveBayes(object):
         -- Ng: N of the dataset
         """
         ones_add = np.ones((1,grouped_data.shape[0]))
-        data_z = np.r_[ones_add, grouped_data.T].astype(int)
+        data_z = np.r_[ones_add, grouped_data.T]
 
         result = np.dot(data_z, data_z.T)
 
